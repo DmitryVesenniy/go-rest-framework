@@ -121,13 +121,23 @@ func (b *BaseView) Put(appCtx *appctx.AppContext) {
 }
 
 func (b *BaseView) LogSetter(appCtx *appctx.AppContext, diff applog.DiffInterface) error {
+	if appCtx.AppLogDiff == nil {
+		return nil
+	}
+
 	model := b.GetSerializer()
 
 	if model != nil {
 		tableName := model.TableName()
 		module := b.Module
 
-		return applog.SetAction(appCtx, tableName, module, diff)
+		return appCtx.AppLogDiff.SetAction(applog.AppLogOptions{
+			User:   appCtx.User,
+			DB:     appCtx.DB,
+			Table:  tableName,
+			Module: module,
+			Method: appCtx.Request.Method,
+		}, diff)
 	}
 	return nil
 }

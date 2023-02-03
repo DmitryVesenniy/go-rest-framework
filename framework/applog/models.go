@@ -6,7 +6,6 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/DmitryVesenniy/go-rest-framework/framework/appctx"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/authentication"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/models"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/serializers"
@@ -46,12 +45,10 @@ func (log *AppLog) Create(db *gorm.DB) error {
 	return tx.Error
 }
 
-func SetAction(appCtx *appctx.AppContext, table string, module string, diff DiffInterface) error {
-	action := GetAction(appCtx.Request.Method)
+func SetAction(opt AppLogOptions, diff DiffInterface) error {
+	action := GetAction(opt.Method)
 
-	user := appCtx.User
-
-	if action == 0 || user == nil || user.ID == 0 {
+	if action == 0 || opt.User == nil || opt.User.ID == 0 {
 		return nil
 	}
 
@@ -67,13 +64,13 @@ func SetAction(appCtx *appctx.AppContext, table string, module string, diff Diff
 
 	appLogInstance := AppLog{
 		Action: action,
-		Module: module,
-		Table:  table,
-		UserID: user.ID,
+		Module: opt.Module,
+		Table:  opt.Table,
+		UserID: opt.User.ID,
 		Diff:   diffDict,
 	}
 
-	return appLogInstance.Create(appCtx.DB)
+	return appLogInstance.Create(opt.DB)
 }
 
 func GetAction(httpMethod string) ActionType {

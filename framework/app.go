@@ -2,12 +2,16 @@ package framework
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
+	"github.com/DmitryVesenniy/go-rest-framework/common"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/appctx"
+	"github.com/DmitryVesenniy/go-rest-framework/framework/applog"
+	"github.com/DmitryVesenniy/go-rest-framework/framework/authentication"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/logger"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/media"
 	"github.com/DmitryVesenniy/go-rest-framework/framework/notifications"
@@ -21,6 +25,7 @@ type App struct {
 	MediaService  *media.MediaServise
 	LogService    logger.LoggerInterface
 	NotivyService notifications.NotificationsInterface
+	AppLogDiff    applog.AppLogDiffInterface
 }
 
 // Initialize initializes the app with predefined configuration
@@ -34,7 +39,7 @@ func NewApp(db *gorm.DB, notivyService notifications.NotificationsInterface) *Ap
 
 func (app *App) wrapperHandlers(hundler func(*appctx.AppContext)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		appCtx := appctx.NewAppContext(w, r, app.DB.Order("id"))
+		appCtx := NewAppContext(w, r, app)
 		hundler(appCtx)
 	}
 }
@@ -86,4 +91,28 @@ func (app *App) RegisterGenericMapView(path string, baseRout *mux.Router, viewsA
 
 func (app *App) RegisterHundler(methods []string, path string, baseRout *mux.Router, hundler func(*appctx.AppContext)) {
 	baseRout.HandleFunc(path, app.wrapperHandlers(hundler)).Methods(methods...)
+}
+
+func NewAppContext(w http.ResponseWriter, r *http.Request, app *App) *appctx.AppContext {
+	userRequests, err := authentication.GetUserFromContext(r.Context().Value(common.ContextUserKey), app.DB)
+	if err != nil {
+		userRequests = nil
+	}
+
+	body, _ := io.ReadAll(r.Body)
+	r.Body.Close()
+
+	appContext := &appctx.AppContext{
+		Request:       r,
+		Response:      w,
+		User:          userRequests,
+		Body:          body,
+		DB:            app.DB.Order("id"),
+		MediaService:  app.MediaService,
+		LogService:    app.LogService,
+		NotivyService: app.NotivyService,
+		AppLogDiff:    app.AppLogDiff,
+	}
+
+	return appContext
 }
