@@ -15,5 +15,4 @@ type SerializersInterface interface {
 type SerializerModels interface {
 	SerializersInterface
 	models.BaseModelInterface
-	SetPK(pk interface{}) error
 }

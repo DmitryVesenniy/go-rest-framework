@@ -13,5 +13,6 @@ type BaseModelInterface interface {
 	Delete(*gorm.DB) error
 	Description() string
 	TableName() string
-	GetPk() uint
+	GetPk() interface{}
+	SetPK(pk interface{}) error
 }
