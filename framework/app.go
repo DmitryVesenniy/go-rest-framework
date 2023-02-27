@@ -107,7 +107,7 @@ func NewAppContext(w http.ResponseWriter, r *http.Request, app *App) *appctx.App
 		Response:      w,
 		User:          userRequests,
 		Body:          body,
-		DB:            app.DB.Order("id"),
+		DB:            app.DB,
 		MediaService:  app.MediaService,
 		LogService:    app.LogService,
 		NotivyService: app.NotivyService,
