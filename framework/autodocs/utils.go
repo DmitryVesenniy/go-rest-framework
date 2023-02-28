@@ -42,31 +42,28 @@ func GetSerializerFields(serializer interface{}, level int) []SerializerField {
 		serializersField = append(serializersField, serializerField)
 	case reflect.Struct:
 		for i := 0; i < serializerReflect.NumField(); i++ {
-			typeField := serializerReflect.Type().Field(i)
+			typeFieldTag := serializerReflect.Type().Field(i)
+			typeField := serializerReflect.Field(i).Type()
 			field := serializerReflect.Field(i)
+
+			if field.Kind() == reflect.Ptr {
+				field = field.Elem()
+				typeField = typeField.Elem()
+			}
+
 			fieldKind := field.Kind()
 
 			typeName := ""
 
-			if typeField.Type.Kind() == reflect.Ptr {
-				typeName = typeField.Type.Elem().Name()
-			} else {
-				typeName = typeField.Type.Name()
-			}
-
-			if field.Kind() == reflect.Ptr {
-				fieldKind = field.Elem().Kind()
-			}
-
-			tag := typeField.Tag.Get("serializer")
-			tagJSON := typeField.Tag.Get("json")
-
-			if tag == "" {
+			tag, ok := typeFieldTag.Tag.Lookup("serializer")
+			if !ok {
 				continue
 			}
 
-			serializerFieldName := typeField.Name
-			if tagJSON != "-" {
+			tagJSON := typeFieldTag.Tag.Get("json")
+
+			serializerFieldName := typeFieldTag.Name
+			if tagJSON != "-" && tagJSON != "" {
 				splited := strings.Split(tagJSON, ",")
 				if len(splited) > 0 {
 					serializerFieldName = splited[0]
@@ -75,7 +72,14 @@ func GetSerializerFields(serializer interface{}, level int) []SerializerField {
 
 			var signatura interface{} = nil
 			if !field.IsValid() {
-				continue
+				field = reflect.New(typeField)
+				if field.Kind() == reflect.Ptr {
+					field = field.Elem()
+				}
+				fieldKind = field.Kind()
+				if !field.IsValid() {
+					continue
+				}
 			}
 			_typeField := field.Type().Name()
 
