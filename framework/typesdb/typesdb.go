@@ -126,11 +126,11 @@ func (b BitBool) GormDataType() string {
 }
 
 func (b BitBool) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
-	var result []byte
+	var result byte
 	if b {
-		result = []byte{1}
+		result = 1
 	} else {
-		result = []byte{0}
+		result = 0
 	}
 	return clause.Expr{
 		SQL:  "?",
