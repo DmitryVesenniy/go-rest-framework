@@ -147,7 +147,7 @@ func (b BitBool) Value() (driver.Value, error) {
 }
 
 func (b *BitBool) Scan(src interface{}) error {
-	v, ok := src.([]byte)
+	v, ok := src.(string)
 	if !ok {
 		return errors.New("bad []byte type assertion")
 	}
@@ -174,7 +174,7 @@ func (uuid UUID1) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
 	}
 }
 func (uuid *UUID1) Scan(v interface{}) error {
-	res, ok := v.([]byte)
+	res, ok := v.(string)
 	if ok {
 		*uuid = UUID1(res)
 	} else {
@@ -213,11 +213,11 @@ func (j JSONB) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
 }
 
 func (j *JSONB) Scan(v interface{}) error {
-	b, ok := v.([]byte)
+	b, ok := v.(string)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-	return json.Unmarshal(b, &j)
+	return json.Unmarshal([]byte(b), &j)
 }
 
 // func (j JSONB) MarshalJSON() ([]byte, error) {
