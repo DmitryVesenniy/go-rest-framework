@@ -104,7 +104,7 @@ func GenericCreate(view ViewInterface, queryset *gorm.DB, data serializers.Seria
 		}
 	}
 
-	err = queryset.First(data).Error
+	err = queryset.Where(data.PrimaryKey(data.GetPk())).First(data).Error
 
 	if err != nil {
 		restErr := &resterrors.BaseError{Err: err.Error()}
@@ -136,7 +136,7 @@ func GenericRetrieve(view ViewInterface, queryset *gorm.DB, data serializers.Ser
 		}
 	}
 
-	queryset = queryset.First(data, "id = ?", pk)
+	queryset = queryset.Where(data.PrimaryKey(pk)).First(data)
 
 	isPermissionObject := view.CheckPermissionObject(appCtx, data)
 	if !isPermissionObject {
@@ -186,7 +186,7 @@ func GenericUpdate(view ViewInterface, queryset *gorm.DB, data serializers.Seria
 		valueType = valueType.Elem()
 	}
 	dataDB := reflect.New(valueType).Interface().(serializers.SerializerModels)
-	err = queryset.First(dataDB, "id = ?", pk).Error
+	err = queryset.Where(data.PrimaryKey(pk)).First(dataDB).Error
 	if err != nil {
 		resterrors.RestErrorResponce(appCtx.Response, resterrors.NotFoundErr)
 		return
@@ -238,7 +238,7 @@ func GenericUpdate(view ViewInterface, queryset *gorm.DB, data serializers.Seria
 	}
 
 	dataResponse := reflect.New(valueType).Interface().(serializers.SerializerModels)
-	err = queryset.First(dataResponse, "id = ?", pk).Error
+	err = queryset.Where(data.PrimaryKey(pk)).First(dataResponse).Error
 	if err != nil {
 		resterrors.RestErrorResponce(appCtx.Response, &resterrors.ModelInstanceError{Err: err})
 		return
@@ -272,7 +272,7 @@ func GenericDelete(view ViewInterface, queryset *gorm.DB, data serializers.Seria
 		return
 	}
 
-	queryset = queryset.First(data, "id = ?", pk)
+	queryset = queryset.Where(data.PrimaryKey(pk)).First(data)
 
 	if queryset.Error != nil {
 		resterrors.RestErrorResponce(appCtx.Response, resterrors.NotFoundErr)

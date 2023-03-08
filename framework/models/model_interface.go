@@ -15,4 +15,5 @@ type BaseModelInterface interface {
 	TableName() string
 	GetPk() interface{}
 	SetPK(pk interface{}) error
+	PrimaryKey(v interface{}) map[string]interface{}
 }
