@@ -5,7 +5,9 @@ import (
 )
 
 type BaseModel struct {
-	Desc string `json:"-" gorm:"-"`
+	Desc     string         `json:"-" gorm:"-"`
+	Instance any            `json:"-" gorm:"-"`
+	Context  map[string]any `json:"-" gorm:"-"`
 }
 
 func (bm *BaseModel) Create(db *gorm.DB) error {
