@@ -125,33 +125,25 @@ func (b BitBool) GormDataType() string {
 	return "bit"
 }
 
-func (b BitBool) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
-	var result byte
-	if b {
-		result = 1
-	} else {
-		result = 0
-	}
-	return clause.Expr{
-		SQL:  "?",
-		Vars: []interface{}{(result)},
-	}
-}
-
 func (b BitBool) Value() (driver.Value, error) {
 	if b {
-		return []byte{1}, nil
+		return byte(1), nil
 	} else {
-		return []byte{0}, nil
+		return byte(0), nil
 	}
 }
 
 func (b *BitBool) Scan(src interface{}) error {
-	v, ok := src.(string)
-	if !ok {
-		return errors.New("bad []byte type assertion")
+	switch v := src.(type) {
+	case int:
+		*b = v == 1
+	case string:
+		*b = v == "1"
+	case []byte:
+		*b = string(v[0]) == "1"
+	default:
+		*b = false
 	}
-	*b = v[0] == 1
 	return nil
 }
 
