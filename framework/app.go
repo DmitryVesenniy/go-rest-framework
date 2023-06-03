@@ -154,7 +154,7 @@ func (app *App) AutoRegister(view views.ViewInterface, path string, baseRout *mu
 
 				view.Retrieve(appCtx)
 			}
-			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodGet, http.MethodOptions)
+			baseRout.HandleFunc(fmt.Sprintf("%s/{pk:.+}", path), fn).Methods(http.MethodGet, http.MethodOptions)
 
 		case views.Update:
 			fn := func(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +166,7 @@ func (app *App) AutoRegister(view views.ViewInterface, path string, baseRout *mu
 
 				view.Update(appCtx)
 			}
-			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodPut, http.MethodOptions)
+			baseRout.HandleFunc(fmt.Sprintf("%s/{pk:.+}", path), fn).Methods(http.MethodPut, http.MethodOptions)
 
 		case views.Delete:
 			fn := func(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +178,7 @@ func (app *App) AutoRegister(view views.ViewInterface, path string, baseRout *mu
 
 				view.Delete(appCtx)
 			}
-			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodDelete, http.MethodOptions)
+			baseRout.HandleFunc(fmt.Sprintf("%s/{pk:.+}", path), fn).Methods(http.MethodDelete, http.MethodOptions)
 		}
 
 	}
