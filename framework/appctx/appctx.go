@@ -25,6 +25,8 @@ type AppContext struct {
 	LogService    logger.LoggerInterface
 	NotivyService notifications.NotificationsInterface
 	AppLogDiff    applog.AppLogDiffInterface
+
+	CtxData map[string]any
 }
 
 // func NewAppContext(w http.ResponseWriter, r *http.Request, db *gorm.DB) *AppContext {

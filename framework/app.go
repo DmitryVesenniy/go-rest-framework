@@ -93,6 +93,98 @@ func (app *App) RegisterHundler(methods []string, path string, baseRout *mux.Rou
 	baseRout.HandleFunc(path, app.wrapperHandlers(hundler)).Methods(methods...)
 }
 
+func (app *App) AutoRegister(view views.ViewInterface, path string, baseRout *mux.Router, mutatingCtx func(*appctx.AppContext)) {
+
+	for _, method := range view.GetMethods() {
+		switch method {
+		case views.GET:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Get(appCtx)
+			}
+			baseRout.HandleFunc(path, fn).Methods(http.MethodGet, http.MethodOptions)
+		case views.POST:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Post(appCtx)
+			}
+			baseRout.HandleFunc(path, fn).Methods(http.MethodPost, http.MethodOptions)
+
+		case views.List:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.List(appCtx)
+			}
+			baseRout.HandleFunc(path, fn).Methods(http.MethodGet, http.MethodOptions)
+
+		case views.Create:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Create(appCtx)
+			}
+			baseRout.HandleFunc(path, fn).Methods(http.MethodPost, http.MethodOptions)
+
+		case views.Retrieve:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Retrieve(appCtx)
+			}
+			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodGet, http.MethodOptions)
+
+		case views.Update:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Update(appCtx)
+			}
+			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodPut, http.MethodOptions)
+
+		case views.Delete:
+			fn := func(w http.ResponseWriter, r *http.Request) {
+				appCtx := NewAppContext(w, r, app)
+
+				if mutatingCtx != nil {
+					mutatingCtx(appCtx)
+				}
+
+				view.Delete(appCtx)
+			}
+			baseRout.HandleFunc(fmt.Sprintf("/%s/{pk:.+}", path), fn).Methods(http.MethodDelete, http.MethodOptions)
+		}
+
+	}
+
+}
+
 func NewAppContext(w http.ResponseWriter, r *http.Request, app *App) *appctx.AppContext {
 	userRequests, err := authentication.GetUserFromContext(r.Context().Value(common.ContextUserKey), app.DB)
 	if err != nil {
