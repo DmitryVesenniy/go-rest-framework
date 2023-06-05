@@ -127,9 +127,9 @@ func (b BitBool) GormDataType() string {
 
 func (b BitBool) Value() (driver.Value, error) {
 	if b {
-		return '1', nil
+		return string('1'), nil
 	} else {
-		return '0', nil
+		return string('0'), nil
 	}
 }
 
